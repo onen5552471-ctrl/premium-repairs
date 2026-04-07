@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="theme-color" content="#0A0A0A"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Premium.Repairs"/>
+<title>Premium.Repairs</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:#0A0A0A;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,sans-serif;color:#FFFFFF;overflow-x:hidden;}
+#root{max-width:430px;margin:0 auto;min-height:100%;position:relative;}
+
+/* Typography */
+.title{font-size:42px;font-weight:900;letter-spacing:-0.03em;line-height:1;}
+.subtitle{font-size:16px;color:rgba(255,255,255,0.5);line-height:1.5;}
+.label{font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:8px;display:block;}
+
+/* Inputs */
+.input-wrap{margin-bottom:16px;}
+.input{width:100%;padding:16px 18px;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:14px;color:#FFF;font-size:16px;outline:none;transition:border-color 0.2s;}
+.input:focus{border-color:rgba(255,165,0,0.6);}
+.input::placeholder{color:rgba(255,255,255,0.25);}
+
+/* Buttons */
+.btn{width:100%;padding:17px;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:-0.01em;transition:transform 0.1s,opacity 0.1s;}
+.btn:active{transform:scale(0.98);opacity:0.85;}
+.btn-primary{background:linear-gradient(135deg,#FF6B00,#FF8C00);color:#FFF;}
+.btn-dark{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);border:1.5px solid rgba(255,255,255,0.1);}
+.btn-sm{padding:10px 18px;font-size:13px;width:auto;border-radius:10px;}
+.btn-ghost{background:none;border:none;color:rgba(255,255,255,0.4);font-size:14px;cursor:pointer;padding:8px;}
+
+/* Error */
+.error{background:rgba(255,59,48,0.12);border:1px solid rgba(255,59,48,0.3);border-radius:10px;padding:12px 14px;font-size:13px;color:#FF6B6B;margin-bottom:14px;}
+
+/* Cards */
+.card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:20px;}
+
+/* Nav */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(10,10,10,0.95);backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,0.06);display:flex;padding:10px 0 30px;z-index:100;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:6px 0;}
+.nav-icon{font-size:24px;line-height:1;}
+.nav-label{font-size:10px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;}
+
+/* Header */
+.top-bar{padding:52px 20px 16px;display:flex;justify-content:space-between;align-items:center;}
+
+/* Stat cards */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.stat-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:18px;}
+.stat-num{font-size:32px;font-weight:900;letter-spacing:-0.03em;line-height:1;margin-bottom:4px;}
+.stat-label{font-size:12px;color:rgba(255,255,255,0.4);font-weight:500;}
+
+/* Badges */
+.badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;}
+
+/* Animations */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.fade-up{animation:fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) both;}
+.fade-in{animation:fadeIn 0.3s ease both;}
+
+/* Divider */
+.divider{display:flex;align-items:center;gap:12px;margin:20px 0;}
+.divider-line{flex:1;height:1px;background:rgba(255,255,255,0.08);}
+.divider-text{font-size:12px;color:rgba(255,255,255,0.3);}
+
+/* Sheet */
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:flex;align-items:flex-end;animation:fadeIn 0.2s ease;}
+.sheet{background:#111;border-radius:24px 24px 0 0;width:100%;max-width:430px;margin:0 auto;padding:20px 20px 50px;max-height:90vh;overflow-y:auto;}
+.sheet-bar{width:36px;height:4px;background:rgba(255,255,255,0.15);border-radius:2px;margin:0 auto 24px;}
+
+/* Scrollable content */
+.scroll-content{padding:0 20px 120px;}
+
+/* Orange accent */
+.orange{color:#FF6B00;}
+.orange-dim{color:rgba(255,107,0,0.7);}
+</style>
+
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+// ── Storage ──
+const S={
+  get:(k,d=null)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}},
+  set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}},
+  del:(k)=>{try{localStorage.removeItem(k);}catch{}}
+};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+const today=()=>new Date().toISOString().slice(0,10);
+const fmtCAD=(n)=>new Intl.NumberFormat('en-CA',{style:'currency',currency:'CAD',minimumFractionDigits:0}).format(n||0);
+
+// ── State ──
+let state={
+  screen:'welcome', // welcome | signin | signup | app
+  user:null,
+  tab:'dashboard',
+  jobs:[],
+  error:'',
+};
+
+// ── Demo data ──
+function makeDemoData(){
+  return[
+    {id:uid(),title:'King St Pothole Repair',client:'City of Toronto',location:'King St W & Spadina',price:2400,cost:1200,status:'paid',date:'2025-04-01',notes:'8 potholes patched'},
+    {id:uid(),title:'Scarborough Mall Lot',client:'Bentley Properties',location:'200 Town Centre Ct',price:5800,cost:2900,status:'active',date:today(),notes:'22 patches needed'},
+    {id:uid(),title:'Residential — Oak Ave',client:'Linda Walsh',location:'88 Oak Ave, Etobicoke',price:480,cost:240,status:'pending',date:today(),notes:'Single driveway pothole'},
+    {id:uid(),title:'Hwy 401 Emergency',client:'MTO Ontario',location:'Hwy 401 W, km 284',price:3200,cost:1600,status:'invoiced',date:'2025-04-03',notes:'Emergency overnight repair'},
+  ];
+}
+
+// ── Render engine ──
+function h(tag,props,...children){
+  const el=document.createElement(tag);
+  if(props)Object.entries(props).forEach(([k,v])=>{
+    if(k==='className')el.className=v;
+    else if(k==='style')Object.assign(el.style,v);
+    else if(k.startsWith('on'))el.addEventListener(k.slice(2).toLowerCase(),v);
+    else el.setAttribute(k,v);
+  });
+  children.flat(Infinity).forEach(c=>{
+    if(c==null||c===false)return;
+    el.appendChild(typeof c==='string'||typeof c==='number'?document.createTextNode(c):c);
+  });
+  return el;
+}
+
+function setState(updates){
+  Object.assign(state,updates);
+  render();
+}
+
+// ── Input helper ──
+function Input({label,type='text',placeholder,value,onInput,id}){
+  return h('div',{className:'input-wrap'},
+    label && h('label',{className:'label',for:id},label),
+    h('input',{className:'input',type,placeholder,value:value||'',id:id||'',
+      onInput:e=>{if(onInput)onInput(e.target.value);}
+    })
+  );
+}
+
+// ── Error box ──
+function ErrorBox(msg){
+  if(!msg)return null;
+  return h('div',{className:'error'},'⚠️ '+msg);
+}
+
+// ════════════════════════════════════════════════
+// WELCOME SCREEN
+// ════════════════════════════════════════════════
+function WelcomeScreen(){
+  return h('div',{className:'fade-up',style:{minHeight:'100vh',display:'flex',flexDirection:'column',padding:'0 24px'}},
+    // Hero
+    h('div',{style:{flex:1,display:'flex',flexDirection:'column',justifyContent:'center',paddingTop:80}},
+      h('div',{style:{fontSize:72,marginBottom:20,lineHeight:1}},'🏗️'),
+      h('div',{className:'title',style:{marginBottom:12}},
+        h('span',{className:'orange'},'Premium'),
+        h('br'),
+        h('span',{},' .Repairs')
+      ),
+      h('p',{className:'subtitle',style:{maxWidth:280,marginBottom:40}},'Professional pothole repair for the Greater Toronto Area.')
+    ),
+    // Buttons
+    h('div',{style:{paddingBottom:60,display:'flex',flexDirection:'column',gap:12}},
+      h('button',{className:'btn btn-primary',onClick:()=>setState({screen:'signup',error:''})},'🚀 Create Owner Account'),
+      h('button',{className:'btn btn-dark',onClick:()=>setState({screen:'signin',error:''})},'Sign In'),
+      h('button',{className:'btn btn-dark',style:{border:'1.5px solid rgba(255,107,0,0.4)',color:'#FF6B00'},onClick:()=>setState({screen:'invite',error:''})},'👷 I Have an Invite Code'),
+      h('div',{className:'divider'},
+        h('div',{className:'divider-line'}),
+        h('span',{className:'divider-text'},'or'),
+        h('div',{className:'divider-line'})
+      ),
+      h('button',{className:'btn-ghost',style:{width:'100%'},onClick:()=>{
+        const guest={id:'guest',name:'Guest',email:'',company:'My Company',role:'owner',isGuest:true};
+        S.set('pr_session',guest);
+        state.jobs=S.get('pr_jobs',null)||makeDemoData();
+        setState({screen:'app',user:guest,tab:'dashboard',error:''});
+      }},'Continue as Guest →')
+    )
+  );
+}
+
+// ════════════════════════════════════════════════
+// SIGN UP
+// ════════════════════════════════════════════════
+function SignUpScreen(){
+  let name='',email='',pass='',company='';
+  const create=()=>{
+    if(!name.trim())return setState({error:'Enter your name.'});
+    if(!email.includes('@'))return setState({error:'Enter a valid email.'});
+    if(pass.length<6)return setState({error:'Password must be 6+ characters.'});
+    if(!company.trim())return setState({error:'Enter your company name.'});
+    const existing=S.get('pr_user_'+email);
+    if(existing)return setState({error:'Account already exists. Sign in instead.'});
+    const user={id:uid(),name,email,company,role:'owner',isGuest:false};
+    S.set('pr_user_'+email,{email,pass,name,company,role:'owner'});
+    S.set('pr_session',user);
+    state.jobs=S.get('pr_jobs',null)||makeDemoData();
+    setState({screen:'app',user,tab:'dashboard',error:''});
+  };
+  return h('div',{className:'fade-up',style:{minHeight:'100vh',padding:'54px 24px 40px'}},
+    // Back
+    h('div',{style:{display:'flex',alignItems:'center',gap:12,marginBottom:36}},
+      h('button',{className:'btn-ghost',style:{padding:'8px 0'},onClick:()=>setState({screen:'welcome',error:''})},'← Back'),
+    ),
+    h('div',{className:'title',style:{fontSize:32,marginBottom:8}},'Create Account'),
+    h('p',{className:'subtitle',style:{marginBottom:36}},'Your data saves securely on this device.'),
+    Input({label:'Full Name',placeholder:'Marcus Johnson',onInput:v=>name=v}),
+    Input({label:'Email',type:'email',placeholder:'you@company.com',onInput:v=>email=v}),
+    Input({label:'Password',type:'password',placeholder:'Min. 6 characters',onInput:v=>pass=v}),
+    Input({label:'Company Name',placeholder:'Premium Repairs Ltd.',onInput:v=>company=v}),
+    state.error?ErrorBox(state.error):null,
+    h('button',{className:'btn btn-primary',onClick:create},'Create Account'),
+    h('div',{style:{textAlign:'center',marginTop:20}},
+      h('button',{className:'btn-ghost',onClick:()=>setState({screen:'signin',error:''})},'Already have an account? Sign in')
+    )
+  );
+}
+
+// ════════════════════════════════════════════════
+// SIGN IN
+// ════════════════════════════════════════════════
+function SignInScreen(){
+  let email='',pass='';
+  const login=()=>{
+    const stored=S.get('pr_user_'+email);
+    if(!stored)return setState({error:'No account found. Sign up first.'});
+    if(stored.pass!==pass)return setState({error:'Incorrect password. Try again.'});
+    const user={id:uid(),name:stored.name,email:stored.email,company:stored.company,role:stored.role||'owner',isGuest:false};
+    S.set('pr_session',user);
+    state.jobs=S.get('pr_jobs',null)||makeDemoData();
+    setState({screen:'app',user,tab:'dashboard',error:''});
+  };
+  return h('div',{className:'fade-up',style:{minHeight:'100vh',padding:'54px 24px 40px'}},
+    h('div',{style:{display:'flex',alignItems:'center',gap:12,marginBottom:36}},
+      h('button',{className:'btn-ghost',style:{padding:'8px 0'},onClick:()=>setState({screen:'welcome',error:''})},'← Back'),
+    ),
+    h('div',{className:'title',style:{fontSize:32,marginBottom:8}},'Welcome Back'),
+    h('p',{className:'subtitle',style:{marginBottom:36}},'Sign in to your account.'),
+    Input({label:'Email',type:'email',placeholder:'you@company.com',onInput:v=>email=v}),
+    Input({label:'Password',type:'password',placeholder:'Your password',onInput:v=>pass=v}),
+    state.error?ErrorBox(state.error):null,
+    h('button',{className:'btn btn-primary',onClick:login},'Sign In →'),
+    h('div',{style:{textAlign:'center',marginTop:20}},
+      h('button',{className:'btn-ghost',onClick:()=>setState({screen:'signup',error:''})},"Don't have an account? Sign up")
+    )
+  );
+}
+
+// ════════════════════════════════════════════════
+// DASHBOARD (Owner view — sees everything)
+// ════════════════════════════════════════════════
+function Dashboard(){
+  const jobs=state.jobs||[];
+  const total=jobs.reduce((s,j)=>s+(j.price||0),0);
+  const profit=jobs.reduce((s,j)=>s+((j.price||0)-(j.cost||0)),0);
+  const margin=total>0?Math.round((profit/total)*100):0;
+  const active=jobs.filter(j=>j.status==='active').length;
+  const pending=jobs.filter(j=>j.status==='pending').length;
+  const paid=jobs.filter(j=>j.status==='paid').length;
+  const invoiced=jobs.filter(j=>j.status==='invoiced').length;
+
+  const STATUS_COLOR={pending:'#F59E0B',active:'#3B82F6',done:'#10B981',invoiced:'#8B5CF6',paid:'#22C55E'};
+
+  return h('div',{className:'scroll-content fade-in'},
+    // Revenue hero
+    h('div',{className:'card',style:{marginBottom:16,background:'linear-gradient(135deg,rgba(255,107,0,0.15),rgba(255,140,0,0.08))',border:'1px solid rgba(255,107,0,0.2)'}},
+      h('div',{style:{fontSize:12,fontWeight:700,color:'rgba(255,107,0,0.7)',letterSpacing:'0.08em',textTransform:'uppercase',marginBottom:10}},'Total Revenue'),
+      h('div',{style:{fontSize:48,fontWeight:900,letterSpacing:'-0.03em',color:'#FF6B00',lineHeight:1,marginBottom:8}},fmtCAD(total)),
+      h('div',{style:{display:'flex',gap:20}},
+        h('div',{},h('span',{style:{color:'rgba(255,255,255,0.4)',fontSize:13}},'Profit: '),h('span',{style:{color:'#10B981',fontWeight:700,fontSize:13}},fmtCAD(profit))),
+        h('div',{},h('span',{style:{color:'rgba(255,255,255,0.4)',fontSize:13}},'Margin: '),h('span',{style:{color:'#10B981',fontWeight:700,fontSize:13}},margin+'%'))
+      )
+    ),
+
+    // Stats
+    h('div',{className:'stat-grid'},
+      h('div',{className:'stat-card'},h('div',{className:'stat-num',style:{color:'#3B82F6'}},active),h('div',{className:'stat-label'},'Active Jobs')),
+      h('div',{className:'stat-card'},h('div',{className:'stat-num',style:{color:'#F59E0B'}},pending),h('div',{className:'stat-label'},'Pending')),
+      h('div',{className:'stat-card'},h('div',{className:'stat-num',style:{color:'#8B5CF6'}},invoiced),h('div',{className:'stat-label'},'Invoiced')),
+      h('div',{className:'stat-card'},h('div',{className:'stat-num',style:{color:'#22C55E'}},paid),h('div',{className:'stat-label'},'Paid'))
+    ),
+
+    // Recent jobs
+    h('div',{style:{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.3)',letterSpacing:'0.08em',textTransform:'uppercase',marginBottom:12}},'Recent Jobs'),
+    ...jobs.slice(0,5).map(j=>{
+      const c=STATUS_COLOR[j.status]||'#888';
+      return h('div',{className:'card',style:{marginBottom:10,display:'flex',justifyContent:'space-between',alignItems:'center'}},
+        h('div',{style:{flex:1,minWidth:0}},
+          h('div',{style:{fontWeight:700,fontSize:15,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',marginBottom:4}},j.title),
+          h('div',{style:{fontSize:13,color:'rgba(255,255,255,0.4)'}},j.client||'—')
+        ),
+        h('div',{style:{textAlign:'right',marginLeft:16,flexShrink:0}},
+          h('div',{style:{fontWeight:800,fontSize:16,color:'#FF6B00',marginBottom:4}},fmtCAD(j.price)),
+          h('span',{className:'badge',style:{background:c+'22',color:c}},j.status)
+        )
+      );
+    }),
+
+    jobs.length===0&&h('div',{className:'card',style:{textAlign:'center',padding:40}},
+      h('div',{style:{fontSize:40,marginBottom:12}},'📋'),
+      h('div',{style:{fontWeight:700,marginBottom:6}},'No jobs yet'),
+      h('div',{style:{fontSize:13,color:'rgba(255,255,255,0.4)'}},'Tap Jobs to add your first job')
+    )
+  );
+}
+
+// ════════════════════════════════════════════════
+// JOBS TAB
+// ════════════════════════════════════════════════
+function Jobs(){
+  const jobs=state.jobs||[];
+  const STATUS_COLOR={pending:'#F59E0B',active:'#3B82F6',done:'#10B981',invoiced:'#8B5CF6',paid:'#22C55E'};
+  const [openId,setOpenId]=[null,id=>render(openId=id)];
+
+  // Track open job
+  if(!window._openJobId)window._openJobId=null;
+
+  const toggleOpen=(id)=>{
+    window._openJobId=window._openJobId===id?null:id;
+    render();
+  };
+
+  const updateStatus=(id,status)=>{
+    const updated=jobs.map(j=>j.id===id?{...j,status}:j);
+    state.jobs=updated;S.set('pr_jobs',updated);render();
+  };
+
+  const deleteJob=(id)=>{
+    const updated=jobs.filter(j=>j.id!==id);
+    state.jobs=updated;S.set('pr_jobs',updated);window._openJobId=null;render();
+  };
+
+  return h('div',{className:'scroll-content fade-in'},
+    h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}},
+      h('div',{style:{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.3)',letterSpacing:'0.08em',textTransform:'uppercase'}},jobs.length+' Jobs'),
+      h('button',{className:'btn btn-primary btn-sm',onClick:()=>{window._showJobForm=true;render();}},'+ New Job')
+    ),
+
+    jobs.length===0&&h('div',{className:'card',style:{textAlign:'center',padding:40}},
+      h('div',{style:{fontSize:40,marginBottom:12}},'📋'),
+      h('div',{style:{fontWeight:700,marginBottom:6}},'No jobs yet'),
+      h('div',{style:{fontSize:13,color:'rgba(255,255,255,0.4)'}},'Tap + New Job to get started')
+    ),
+
+    ...jobs.map(j=>{
+      const c=STATUS_COLOR[j.status]||'#888';
+      const isOpen=window._openJobId===j.id;
+      return h('div',{className:'card',style:{marginBottom:10,cursor:'pointer'},onClick:()=>toggleOpen(j.id)},
+        h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}},
+          h('div',{style:{flex:1,minWidth:0}},
+            h('div',{style:{fontWeight:700,fontSize:15,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',marginBottom:4}},j.title),
+            h('div',{style:{fontSize:13,color:'rgba(255,255,255,0.4)',marginBottom:8}},j.client||(j.location||'No client')),
+            h('span',{className:'badge',style:{background:c+'22',color:c}},j.status)
+          ),
+          h('div',{style:{textAlign:'right',marginLeft:16,flexShrink:0}},
+            h('div',{style:{fontWeight:800,fontSize:18,color:'#FF6B00',marginBottom:4}},fmtCAD(j.price)),
+            h('div',{style:{fontSize:12,color:'#10B981'}},fmtCAD((j.price||0)-(j.cost||0))+' profit')
+          )
+        ),
+        isOpen&&h('div',{style:{borderTop:'1px solid rgba(255,255,255,0.06)',marginTop:14,paddingTop:14},onClick:e=>e.stopPropagation()},
+          j.location&&h('div',{style:{fontSize:13,color:'rgba(255,255,255,0.4)',marginBottom:8}},'📍 '+j.location),
+          j.notes&&h('div',{style:{fontSize:13,color:'rgba(255,255,255,0.5)',background:'rgba(255,255,255,0.04)',borderRadius:10,padding:'10px 12px',marginBottom:12,fontStyle:'italic'}},j.notes),
+          h('div',{style:{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.3)',letterSpacing:'0.07em',textTransform:'uppercase',marginBottom:8}},'Update Status'),
+          h('div',{style:{display:'flex',flexWrap:'wrap',gap:6,marginBottom:14}},
+            ...Object.entries(STATUS_COLOR).map(([k,c])=>
+              h('button',{style:{padding:'6px 12px',borderRadius:20,border:`1.5px solid ${j.status===k?c:'rgba(255,255,255,0.1)'}`,background:j.status===k?c+'22':'transparent',color:j.status===k?c:'rgba(255,255,255,0.4)',fontSize:12,fontWeight:700,cursor:'pointer'},onClick:()=>updateStatus(j.id,k)},k)
+            )
+          ),
+          h('button',{style:{background:'rgba(255,59,48,0.1)',border:'1px solid rgba(255,59,48,0.2)',borderRadius:10,padding:'8px 14px',color:'#FF6B6B',fontSize:13,fontWeight:600,cursor:'pointer'},onClick:()=>deleteJob(j.id)},'🗑️ Delete Job')
+        )
+      );
+    }),
+
+    // New job sheet
+    window._showJobForm&&JobFormSheet()
+  );
+}
+
+function JobFormSheet(){
+  let title='',client='',location='',price='',cost='',notes='',status='pending';
+  const save=()=>{
+    if(!title.trim()){state.error='Enter a job title.';render();return;}
+    const job={id:uid(),title,client,location,price:parseFloat(price)||0,cost:parseFloat(cost)||0,notes,status,date:today()};
+    const updated=[job,...(state.jobs||[])];
+    state.jobs=updated;S.set('pr_jobs',updated);
+    window._showJobForm=false;state.error='';render();
+  };
+  return h('div',{className:'sheet-bg',onClick:()=>{window._showJobForm=false;state.error='';render();}},
+    h('div',{className:'sheet',onClick:e=>e.stopPropagation()},
+      h('div',{className:'sheet-bar'}),
+      h('div',{style:{fontSize:22,fontWeight:800,marginBottom:24}},'New Job'),
+      h('div',{className:'input-wrap'},h('label',{className:'label'},'Job Title *'),h('input',{className:'input',placeholder:'e.g. King St Pothole Repair',onInput:e=>title=e.target.value})),
+      h('div',{className:'input-wrap'},h('label',{className:'label'},'Client'),h('input',{className:'input',placeholder:'e.g. City of Toronto',onInput:e=>client=e.target.value})),
+      h('div',{className:'input-wrap'},h('label',{className:'label'},'Location'),h('input',{className:'input',placeholder:'e.g. 123 King St W',onInput:e=>location=e.target.value})),
+      h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:16}},
+        h('div',{},h('label',{className:'label'},'Price (CAD$)'),h('input',{className:'input',type:'number',placeholder:'0',onInput:e=>price=e.target.value})),
+        h('div',{},h('label',{className:'label'},'Your Cost (CAD$)'),h('input',{className:'input',type:'number',placeholder:'0',onInput:e=>cost=e.target.value}))
+      ),
+      h('div',{className:'input-wrap'},h('label',{className:'label'},'Status'),
+        h('select',{className:'input',style:{appearance:'none'},onInput:e=>status=e.target.value},
+          ...['pending','active','done','invoiced','paid'].map(s=>h('option',{value:s},s))
+        )
+      ),
+      h('div',{className:'input-wrap'},h('label',{className:'label'},'Notes'),h('textarea',{className:'input',style:{resize:'vertical',minHeight:80},placeholder:'Any details...',onInput:e=>notes=e.target.value})),
+      state.error?ErrorBox(state.error):null,
+      h('button',{className:'btn btn-primary',onClick:save},'Save Job')
+    )
+  );
+}
+
+// ════════════════════════════════════════════════
+// PROFILE TAB
+// ════════════════════════════════════════════════
+function ProfileTab(){
+  const u=state.user;
+  return h('div',{className:'scroll-content fade-in'},
+    h('div',{className:'card',style:{marginBottom:16,textAlign:'center',padding:32}},
+      h('div',{style:{width:72,height:72,borderRadius:22,background:'linear-gradient(135deg,#FF6B00,#FF8C00)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:30,fontWeight:900,margin:'0 auto 16px',color:'#fff'}},
+        u.isGuest?'👤':(u.name?.[0]||'?').toUpperCase()
+      ),
+      h('div',{style:{fontSize:22,fontWeight:800,marginBottom:4}},u.isGuest?'Guest User':u.name),
+      h('div',{style:{fontSize:14,color:'rgba(255,255,255,0.4)',marginBottom:8}},u.email||'No email'),
+      h('div',{style:{display:'inline-flex',alignItems:'center',gap:6,background:'rgba(255,107,0,0.12)',border:'1px solid rgba(255,107,0,0.25)',borderRadius:20,padding:'5px 14px'}},
+        h('span',{},u.role==='owner'?'👑':'👷'),
+        h('span',{style:{fontSize:13,fontWeight:700,color:'#FF6B00'}},u.role==='owner'?'Owner':'Worker')
+      )
+    ),
+    h('div',{className:'card',style:{marginBottom:16}},
+      h('div',{style:{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.3)',letterSpacing:'0.08em',textTransform:'uppercase',marginBottom:12}},'Company'),
+      h('div',{style:{fontSize:18,fontWeight:700}},u.company||'No company set')
+    ),
+    // Invite workers section - owners only
+    u.role==='owner'&&!u.isGuest&&h('div',{className:'card',style:{marginBottom:16}},
+      h('div',{style:{fontSize:14,fontWeight:700,marginBottom:16}},'👷 Invite a Worker'),
+      h('div',{className:'input-wrap'},
+        h('label',{className:'label'},'Worker Name'),
+        h('input',{className:'input',placeholder:'e.g. Jake Miller',id:'inv-name'})
+      ),
+      h('div',{className:'input-wrap'},
+        h('label',{className:'label'},'Their Pay Per Job (CAD$)'),
+        h('input',{className:'input',type:'number',placeholder:'e.g. 200',id:'inv-pay'})
+      ),
+      h('button',{className:'btn btn-primary',style:{background:'linear-gradient(135deg,#FF6B00,#FF8C00)'},onClick:()=>{
+        const nameEl=document.getElementById('inv-name');
+        const payEl=document.getElementById('inv-pay');
+        const wname=nameEl?nameEl.value.trim():'';
+        const wpay=payEl?parseFloat(payEl.value)||0:0;
+        if(!wname)return;
+        const code=Math.random().toString(36).slice(2,5).toUpperCase()+'-'+Math.random().toString(36).slice(2,5).toUpperCase();
+        S.set('pr_inv_'+code,{name:wname,pay:wpay,company:u.company,ownerId:u.id,used:false});
+        window._lastInvCode=code;window._lastInvName=wname;window._lastInvPay=wpay;
+        render();
+      }},'Generate Invite Code'),
+      window._lastInvCode&&h('div',{style:{marginTop:16,background:'rgba(16,185,129,0.08)',border:'1px solid rgba(16,185,129,0.2)',borderRadius:14,padding:16,textAlign:'center'}},
+        h('div',{style:{fontSize:12,color:'#10B981',fontWeight:700,marginBottom:8}},'✅ Code ready for '+window._lastInvName),
+        h('div',{style:{fontSize:36,fontWeight:900,letterSpacing:'0.15em',background:'rgba(255,255,255,0.06)',borderRadius:12,padding:'14px',marginBottom:10}},(window._lastInvCode||'')),
+        h('div',{style:{fontSize:13,color:'rgba(255,255,255,0.4)',lineHeight:1.6,marginBottom:12}},'Pay: '+fmtCAD(window._lastInvPay)+' per job · Send this code to '+window._lastInvName+'. They tap "I Have an Invite Code" on the welcome screen.'),
+        h('button',{style:{background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:10,padding:'8px 16px',color:'rgba(255,255,255,0.5)',fontSize:13,cursor:'pointer'},onClick:()=>{window._lastInvCode=null;render();}},'Invite Another')
+      )
+    ),
+    h('button',{className:'btn btn-dark',style:{marginBottom:12},onClick:()=>{
+      S.del('pr_session');
+      window._openJobId=null;window._showJobForm=false;
+      setState({screen:'welcome',user:null,jobs:[],tab:'dashboard',error:''});
+    }},u.isGuest?'Sign In / Create Account':'Sign Out'),
+    h('div',{style:{textAlign:'center',marginTop:24}},
+      h('div',{style:{fontSize:12,color:'rgba(255,255,255,0.15)'}},'PREMIUM.REPAIRS · v2.0')
+    )
+  );
+}
+
+// ════════════════════════════════════════════════
+// MAIN APP SHELL
+// ════════════════════════════════════════════════
+function AppShell(){
+  const isWorker=state.user?.role==='worker';
+  const TABS=isWorker?[
+    {id:'myjobs',icon:'📋',label:'My Jobs'},
+    {id:'profile',icon:'👤',label:'Profile'},
+  ]:[
+    {id:'dashboard',icon:'📊',label:'Dashboard'},
+    {id:'jobs',icon:'📋',label:'Jobs'},
+    {id:'profile',icon:'👤',label:'Profile'},
+  ];
+  return h('div',{className:'fade-in'},
+    // Top bar
+    h('div',{className:'top-bar'},
+      h('div',{},
+        h('div',{style:{fontWeight:900,fontSize:20,letterSpacing:'-0.02em'}},
+          h('span',{className:'orange'},'Premium'),h('span',{style:{color:'rgba(255,255,255,0.5)'}},'.Repairs')
+        ),
+        h('div',{style:{fontSize:12,color:'rgba(255,255,255,0.3)',marginTop:2}},state.user?.company||'')
+      ),
+      h('div',{style:{background:'rgba(255,107,0,0.12)',border:'1px solid rgba(255,107,0,0.25)',borderRadius:20,padding:'4px 12px',fontSize:12,fontWeight:700,color:'#FF6B00'}},state.user?.role==='owner'?'👑 Owner':'👷 Worker')
+    ),
+    // Content
+    state.user?.role==='worker'?(
+      state.tab==='myjobs'?WorkerJobs():ProfileTab()
+    ):(
+      state.tab==='dashboard'?Dashboard():
+      state.tab==='jobs'?Jobs():
+      ProfileTab()
+    ),
+    // Bottom nav
+    h('nav',{className:'bottom-nav'},
+      ...TABS.map(t=>{
+        const active=state.tab===t.id;
+        return h('button',{className:'nav-item',onClick:()=>{window._openJobId=null;setState({tab:t.id,error:''});}},
+          h('span',{className:'nav-icon'},t.icon),
+          h('span',{className:'nav-label',style:{color:active?'#FF6B00':'rgba(255,255,255,0.3)'}},t.label)
+        );
+      })
+    )
+  );
+}
+
+// ════════════════════════════════════════════════
+// INVITE SIGN UP (Worker flow)
+// ════════════════════════════════════════════════
+function InviteScreen(){
+  let code='',name='',pass='';
+  let invite=null;
+  let step=1;
+  const wrap=h('div',{className:'fade-up',style:{minHeight:'100vh',padding:'54px 24px 40px'}});
+  
+  const showStep1=()=>{
+    wrap.innerHTML='';
+    wrap.appendChild(h('div',{style:{display:'flex',alignItems:'center',gap:12,marginBottom:36}},
+      h('button',{className:'btn-ghost',style:{padding:'8px 0'},onClick:()=>setState({screen:'welcome',error:''})},'← Back')
+    ));
+    wrap.appendChild(h('div',{className:'title',style:{fontSize:32,marginBottom:8}},'Join Your Team'));
+    wrap.appendChild(h('p',{className:'subtitle',style:{marginBottom:36}},'Enter the invite code your owner sent you.'));
+    const codeInput=h('input',{className:'input',placeholder:'e.g. AB1-CD2',style:{fontSize:24,fontWeight:800,textAlign:'center',letterSpacing:'0.15em',marginBottom:16,display:'block',width:'100%'}});
+    wrap.appendChild(h('div',{className:'input-wrap'},h('label',{className:'label'},'Invite Code'),codeInput));
+    const errEl=h('div',{style:{display:'none'}});
+    wrap.appendChild(errEl);
+    wrap.appendChild(h('button',{className:'btn btn-primary',style:{background:'linear-gradient(135deg,#FF6B00,#FF8C00)'},onClick:()=>{
+      const c=codeInput.value.trim().toUpperCase();
+      const inv=S.get('pr_inv_'+c,null);
+      if(!inv){errEl.className='error';errEl.style.display='';errEl.textContent='⚠️ Invalid code. Check with your owner.';return;}
+      if(inv.used){errEl.className='error';errEl.style.display='';errEl.textContent='⚠️ Code already used. Ask for a new one.';return;}
+      code=c;invite=inv;name=inv.name||'';step=2;showStep2();
+    }},'Verify Code →'));
+  };
+  
+  const showStep2=()=>{
+    wrap.innerHTML='';
+    wrap.appendChild(h('div',{style:{display:'flex',alignItems:'center',gap:12,marginBottom:24}},
+      h('button',{className:'btn-ghost',style:{padding:'8px 0'},onClick:()=>{step=1;showStep1();}},'← Back')
+    ));
+    wrap.appendChild(h('div',{style:{background:'rgba(16,185,129,0.08)',border:'1px solid rgba(16,185,129,0.2)',borderRadius:14,padding:16,marginBottom:24,display:'flex',alignItems:'center',gap:12}},
+      h('div',{style:{fontSize:28}},'✅'),
+      h('div',{},
+        h('div',{style:{fontWeight:700,fontSize:15,marginBottom:4}},'Code verified!'),
+        h('div',{style:{fontSize:13,color:'rgba(255,255,255,0.4)'}},(invite?.company||'')+' · Pay: '+fmtCAD(invite?.pay||0)+' per job')
+      )
+    ));
+    wrap.appendChild(h('div',{className:'title',style:{fontSize:28,marginBottom:24}},'Create Your Account'));
+    const nameInput=h('input',{className:'input',value:name});
+    const passInput=h('input',{className:'input',type:'password',placeholder:'Min. 6 characters'});
+    wrap.appendChild(h('div',{className:'input-wrap'},h('label',{className:'label'},'Your Name'),nameInput));
+    wrap.appendChild(h('div',{className:'input-wrap',style:{marginBottom:20}},h('label',{className:'label'},'Password'),passInput));
+    const errEl=h('div',{style:{display:'none'}});
+    wrap.appendChild(errEl);
+    wrap.appendChild(h('button',{className:'btn btn-primary',style:{background:'linear-gradient(135deg,#FF6B00,#FF8C00)'},onClick:()=>{
+      const n=nameInput.value.trim();const p=passInput.value;
+      if(!n){errEl.className='error';errEl.style.display='';errEl.textContent='⚠️ Enter your name.';return;}
+      if(p.length<6){errEl.className='error';errEl.style.display='';errEl.textContent='⚠️ Password must be 6+ characters.';return;}
+      // Mark invite used
+      S.set('pr_inv_'+code,{...invite,used:true});
+      // Create worker account
+      const workerId=uid();
+      const user={id:workerId,name:n,email:'worker_'+code,company:invite.company,role:'worker',pay:invite.pay||0,ownerId:invite.ownerId,isGuest:false};
+      S.set('pr_user_worker_'+code,{pass:p,name:n,company:invite.company,role:'worker',pay:invite.pay||0,ownerId:invite.ownerId,inviteCode:code});
+      S.set('pr_session',user);
+      // Load owner jobs
+      state.jobs=S.get('pr_jobs',null)||[];
+      setState({screen:'app',user,tab:'myjobs',error:''});
+    }},'👷 Join the Team'));
+  };
+  
+  showStep1();
+  return wrap;
+}
+
+// ════════════════════════════════════════════════
+// WORKER VIEW — My Jobs
+// ════════════════════════════════════════════════
+function WorkerJobs(){
+  const u=state.user;
+  const jobs=state.jobs||[];
+  const STATUS_COLOR={pending:'#F59E0B',active:'#3B82F6',done:'#10B981',invoiced:'#8B5CF6',paid:'#22C55E'};
+  const myJobs=jobs; // Show all jobs to worker for now
+  const earned=myJobs.filter(j=>j.status==='paid'||j.status==='done').length*(u.pay||0);
+
+  return h('div',{className:'scroll-content fade-in'},
+    // Pay summary card
+    h('div',{className:'card',style:{marginBottom:16,background:'linear-gradient(135deg,rgba(255,107,0,0.15),rgba(255,140,0,0.08))',border:'1px solid rgba(255,107,0,0.2)'}},
+      h('div',{style:{fontSize:12,fontWeight:700,color:'rgba(255,107,0,0.7)',letterSpacing:'0.08em',textTransform:'uppercase',marginBottom:8}},'Your Earnings'),
+      h('div',{style:{fontSize:44,fontWeight:900,letterSpacing:'-0.03em',color:'#FF6B00',lineHeight:1,marginBottom:8}},fmtCAD(earned)),
+      h('div',{style:{fontSize:13,color:'rgba(255,255,255,0.4)'}},fmtCAD(u.pay||0)+' per completed job · '+myJobs.filter(j=>j.status==='paid'||j.status==='done').length+' jobs completed')
+    ),
+
+    h('div',{style:{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.3)',letterSpacing:'0.08em',textTransform:'uppercase',marginBottom:12}},'Your Jobs ('+myJobs.length+')'),
+
+    myJobs.length===0&&h('div',{className:'card',style:{textAlign:'center',padding:40}},
+      h('div',{style:{fontSize:40,marginBottom:12}},'📋'),
+      h('div',{style:{fontWeight:700,marginBottom:6}},'No jobs assigned yet'),
+      h('div',{style:{fontSize:13,color:'rgba(255,255,255,0.4)'}},'Your owner will assign jobs to you')
+    ),
+
+    ...myJobs.map(j=>{
+      const c=STATUS_COLOR[j.status]||'#888';
+      const isOpen=window._openJobId===j.id;
+      return h('div',{className:'card',style:{marginBottom:10,cursor:'pointer'},onClick:()=>{window._openJobId=isOpen?null:j.id;render();}},
+        h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}},
+          h('div',{style:{flex:1,minWidth:0}},
+            h('div',{style:{fontWeight:700,fontSize:15,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',marginBottom:4}},j.title),
+            h('div',{style:{fontSize:13,color:'rgba(255,255,255,0.4)',marginBottom:8}},j.location||j.client||''),
+            h('span',{className:'badge',style:{background:c+'22',color:c}},j.status)
+          ),
+          // Worker sees their pay per job, not total revenue
+          h('div',{style:{textAlign:'right',marginLeft:16,flexShrink:0}},
+            h('div',{style:{fontSize:12,color:'rgba(255,255,255,0.4)',marginBottom:4}},'Your Pay'),
+            h('div',{style:{fontWeight:800,fontSize:20,color:'#10B981'}},fmtCAD(u.pay||0))
+          )
+        ),
+        isOpen&&h('div',{style:{borderTop:'1px solid rgba(255,255,255,0.06)',marginTop:14,paddingTop:14},onClick:e=>e.stopPropagation()},
+          j.notes&&h('div',{style:{fontSize:13,color:'rgba(255,255,255,0.5)',background:'rgba(255,255,255,0.04)',borderRadius:10,padding:'10px 12px',marginBottom:12,fontStyle:'italic'}},j.notes),
+          h('div',{style:{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.3)',letterSpacing:'0.07em',textTransform:'uppercase',marginBottom:8}},'Update Status'),
+          h('div',{style:{display:'flex',flexWrap:'wrap',gap:6}},
+            ...['active','done'].map(k=>
+              h('button',{style:{padding:'8px 16px',borderRadius:20,border:`1.5px solid ${j.status===k?STATUS_COLOR[k]:'rgba(255,255,255,0.1)'}`,background:j.status===k?STATUS_COLOR[k]+'22':'transparent',color:j.status===k?STATUS_COLOR[k]:'rgba(255,255,255,0.4)',fontSize:13,fontWeight:700,cursor:'pointer'},onClick:()=>{
+                const updated=state.jobs.map(jj=>jj.id===j.id?{...jj,status:k}:jj);
+                state.jobs=updated;S.set('pr_jobs',updated);render();
+              }},k==='active'?'▶️ Mark Active':'✅ Mark Done')
+            )
+          )
+        )
+      );
+    })
+  );
+}
+
+// ════════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════════
+function render(){
+  const root=document.getElementById('root');
+  root.innerHTML='';
+  let el;
+  if(state.screen==='welcome')el=WelcomeScreen();
+  else if(state.screen==='signup')el=SignUpScreen();
+  else if(state.screen==='signin')el=SignInScreen();
+  else if(state.screen==='invite')el=InviteScreen();
+  else el=AppShell();
+  root.appendChild(el);
+}
+
+// ── Boot ──
+const session=S.get('pr_session');
+if(session){
+  state.user=session;
+  state.jobs=S.get('pr_jobs',null)||makeDemoData();
+  state.screen='app';
+  state.tab=session.role==='worker'?'myjobs':'dashboard';
+}
+render();
+</script>
+
+</body>
+</html>
