@@ -154,9 +154,9 @@ textarea.auth-input{resize:vertical;min-height:80px;}
 <script>
 
 const S={
-get:(k,d=null)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}},
-set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}},
-del:(k)=>{try{localStorage.removeItem(k);}catch{}}
+get:(k,d=null)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},
+set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},
+del:(k)=>{try{localStorage.removeItem(k);}catch(e){}}
 };
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
 const today=()=>new Date().toISOString().slice(0,10);
@@ -186,10 +186,10 @@ if(!d.documents)return[];
 return d.documents.map(function(doc){return Object.assign({id:doc.name.split(’/’).pop()},fromFS(doc));});
 }catch(e){return[];}
 },
-async setJob(token,cid,job){try{var _id=job.id;var _data={};Object.keys(job).forEach(function(k){if(k!==‘id’)_data[k]=job[k];});_data.id=_id;var id=_id;var data=_data;await fetch(FB.fsUrl+’/companies/’+cid+’/jobs/’+id,{method:‘PATCH’,headers:{Authorization:’Bearer ’+token,‘Content-Type’:‘application/json’},body:JSON.stringify(toFS(data))});}catch{}},
-async deleteJob(token,cid,jid){try{await fetch(`${FB.fsUrl}/companies/${cid}/jobs/${jid}`,{method:‘DELETE’,headers:{Authorization:`Bearer ${token}`}});}catch{}},
-async getProfile(token,uid){try{const r=await fetch(`${FB.fsUrl}/users/${uid}`,{headers:{Authorization:`Bearer ${token}`}});return fromFS(await r.json());}catch{return null;}},
-async setProfile(token,uid,data){try{await fetch(`${FB.fsUrl}/users/${uid}`,{method:‘PATCH’,headers:{Authorization:`Bearer ${token}`,‘Content-Type’:‘application/json’},body:JSON.stringify(toFS(data))});}catch{}},
+async setJob(token,cid,job){try{var _id=job.id;var _data={};Object.keys(job).forEach(function(k){if(k!==‘id’)_data[k]=job[k];});_data.id=_id;var id=_id;var data=_data;await fetch(FB.fsUrl+’/companies/’+cid+’/jobs/’+id,{method:‘PATCH’,headers:{Authorization:’Bearer ’+token,‘Content-Type’:‘application/json’},body:JSON.stringify(toFS(data))});}catch(e){}},
+async deleteJob(token,cid,jid){try{await fetch(`${FB.fsUrl}/companies/${cid}/jobs/${jid}`,{method:‘DELETE’,headers:{Authorization:`Bearer ${token}`}});}catch(e){}},
+async getProfile(token,uid){try{const r=await fetch(`${FB.fsUrl}/users/${uid}`,{headers:{Authorization:`Bearer ${token}`}});return fromFS(await r.json());}catch(e){return null;}},
+async setProfile(token,uid,data){try{await fetch(`${FB.fsUrl}/users/${uid}`,{method:‘PATCH’,headers:{Authorization:`Bearer ${token}`,‘Content-Type’:‘application/json’},body:JSON.stringify(toFS(data))});}catch(e){}},
 };
 
 async function sendMessage(chatId,msg){
@@ -425,7 +425,7 @@ await FBStore.setProfile(res.idToken,res.localId,{name,email,company,companyId:r
 S.set(‘pr_session’,user);S.set(‘pr_user_’+email,{email,pass,name,company,companyId:res.localId,role:‘owner’});
 state.jobs=makeDemoData();for(var _ji=0;_ji<state.jobs.length;_ji++)await FBStore.setJob(res.idToken,res.localId,state.jobs[*ji]);S.set(‘pr_jobs’,state.jobs);
 setState({screen:‘app’,user,tab:‘home’,error:’’,syncing:false});
-}catch{
+}catch(e){
 const user={id:uid(),name,email,company,companyId:uid(),role:‘owner’,isGuest:false,idToken:null};
 S.set(’pr_user*’+email,{email,pass,name,company,role:‘owner’});S.set(‘pr_session’,user);
 state.jobs=makeDemoData();S.set(‘pr_jobs’,state.jobs);setState({screen:‘app’,user,tab:‘home’,error:’’,syncing:false});
@@ -469,7 +469,7 @@ setState({screen:‘app’,user,tab:‘home’,error:’’,syncing:false});
 requestNotifPermission();
 if(window._syncTimer)clearInterval(window._syncTimer);
 window.*syncTimer=setInterval(syncDown,15000);
-}catch{
+}catch(e){
 const stored=S.get(’pr_user*’+email);
 if(!stored)return setState({error:‘No account found.’,syncing:false});
 if(stored.pass!==pass)return setState({error:‘Incorrect password.’,syncing:false});
@@ -2188,7 +2188,7 @@ if(s.refreshToken){
   try{
     const res=await FBAuth.refresh(s.refreshToken);
     if(res.id_token){state.user=Object.assign({},s,{idToken:res.id_token,refreshToken:res.refresh_token});S.set('pr_session',state.user);await syncDown();if(window._syncTimer)clearInterval(window._syncTimer);window._syncTimer=setInterval(syncDown,15000);}
-  }catch{}
+  }catch(e){}
 }
 ```
 
